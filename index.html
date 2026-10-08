@@ -44,20 +44,63 @@
       position: relative;
     }
 
+    /* ESTILO PARA EL LOGO RIPLEY */
     .logo-container {
       text-align: center;
       margin-bottom: 20px;
     }
-    .logo-img {
-      max-width: 220px;
-      height: auto;
-      display: inline-block;
+    .ripley-logo-box {
+      display: inline-flex;
+      align-items: center;
+      background-color: #000;
+      padding: 12px 20px;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      max-width: 100%;
+    }
+    .ripley-text {
+      color: #ffffff;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 32px;
+      letter-spacing: 14px;
+      margin-right: -14px;
+      font-weight: normal;
+      user-select: none;
+    }
+    .ripley-dotcom {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      margin-left: 12px;
+      font-family: Arial, sans-serif;
+      user-select: none;
+    }
+    .ripley-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(to right, 
+        #d9252e 0%, #d9252e 12%, 
+        #792a7e 12%, #792a7e 24%, 
+        #f6cd00 24%, #f6cd00 36%, 
+        #cccccc 36%, #cccccc 48%, 
+        #d9252e 48%, #d9252e 60%, 
+        #792a7e 60%, #792a7e 72%, 
+        #f6cd00 72%, #f6cd00 84%, 
+        #d9252e 84%, #d9252e 100%
+      );
     }
 
     h2 { 
       text-align: center; 
       color: #1a252f; 
-      margin-top: 0;
+      margin-top: 15px;
       margin-bottom: 25px; 
     }
     
@@ -187,9 +230,15 @@
 
   <div class="container">
     
-    <!-- LOGOTIPO RIPLEY -->
+    <!-- LOGOTIPO RIPLEY EMBEBIDO (100% GARANTIZADO) -->
     <div class="logo-container">
-      <img src="https://simple.ripley.cl/static/images/ripley-logo.svg" class="logo-img" alt="Ripley.com">
+      <div style="display: inline-flex; align-items: center;">
+        <div class="ripley-logo-box">
+          <span class="ripley-text">RIPLEY</span>
+          <div class="ripley-bar"></div>
+        </div>
+        <span class="ripley-dotcom">.com</span>
+      </div>
     </div>
 
     <!-- MENÚ PRINCIPAL -->
