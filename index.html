@@ -44,6 +44,18 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
       position: relative;
     }
+
+    /* Estilo para el logotipo centrado */
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo-img {
+      max-width: 220px;
+      height: auto;
+      display: inline-block;
+    }
+
     h2 { 
       text-align: center; 
       color: #1a252f; 
@@ -161,7 +173,7 @@
       border-color: #f5c6cb; 
     }
 
-    /* Estilo Marca de Agua Pie de Página */
+    /* Marca de agua de pie de página */
     .watermark {
       text-align: center;
       font-size: 11px;
@@ -178,6 +190,34 @@
 
   <div class="container">
     
+    <!-- LOGOTIPO RIPLEY -->
+    <div class="logo-container">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSU5EQVR42u2dW2wcVRiG103TNhRKlRYo
+VLE2pSpCSoUSsBUBFWp50QfTGDEq8EBD4gGf9A1iTFQk3o2GGBN5I8Y3E4mGqJAnExLjpUlE4wWJ
+CS8m3qBAKa1A24623S5zzpxlZmc/c9pud+s84ydfzp6dd/bvP//Z/2/O7H4lJSUlJSUlJSUlJSUl
+JSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlJSUlhf4vSj4C/i1oIe4023G5xT7L2TfM/sbs
+Y2I/JvZes/ea/Y3ZP5g9xOwmI7yFfI34U3A69S7OPh0385S3xO5L1y12P2Pfp34l4RfZN9l/pXpI
+3xP7O/A/w9mnhf+c15/347v4Ocf9R6U4aF60vA3sC2b3M/sy+xuz35k9z+x+cT+S1v3yWtzXkO+x
+v7m4H9N3/T+o3/s/p9fGv45I6Y5/B/9/L++vCfeQ+PvxH5e+X5L3I4X8QxK3v8x9mX2G8+m4v0e/
+m2I/Iu5j393/fA/+CvyD6f/7C5f9y/O91/v+r+D+4oI8Afdz4d40/O38jIhfE3c333/x3099l32+
+I30P/Y1L2f3C3I+33w29E+i/I277mD7w28eS/1O/m7A+4I6Euy9pXmN7X4z3q4m4C/4A/S3033T4
+eYVvW/A5XGffsPAt832Hvd9+5LdOevpYcZ3X+Bvgd3F/Q9pX6Fvx51Bv+Fv4f5u9H80J5v626/66
+6S3469yvY652n1P41qTvx8J/l6473x24Dvxm7p/x94x/Xvxm6s9Ie6x0f4e+H+SjOftkX/e/26H/
+S+Dvgd3qOq+x2xN1f1X0e3m967jX4m7X+03xGzXmJfwE4Y+B70rf2fInq28fC99+cT9R+A/0638X
++f9Q8k2y23I4O5S9s104b2E3890k6jGxd9oX/S36HqJ5i4A7U4yIe5e4j1k/3o7/P+29e/391cDf
+sS8v43c1v13K+d6+GzHvh7Xvf97v74v/R+1Lq3p4eC6kP2I14aP025m37I/P/d3E8019N8f9iI48
+X+x/2/p31Jz/8v8P69x/f8DfsXpM30XNveS1l30lfgL+J2pvy9a/Y8V3Lfe8/xO+2b7m4v0vK4fI
+c2v/s/4G7P/L4f6P13mOfd6K/E1Wn4nfxL2b3vG13/l/s7pMv4/f4f/981f9/fR0u0p6e45p8Sfh
+v+Xvwv0E4XmIuxLqCvyT6L+A/1j+b5zT1L/x2f83dD2/03dF4z7f2O/Qv+250v+K/t+4X8X18v+u
+45+f7l6m8m3Xv/e7vL4d5r298I9fI++4n3A8s210Xef6m8f3uV+/61L2e5+u2P2yvInC/w7+i/sM
+vV/j/9nS/1x//5m9v3C9I91y3p8+vP+j74bve9m6P3r4d97v28/0X2Bf7nO12Pfgj9eP6922vB6p
+x3m+34P4H9N3Lff8IffvXf++fJ/b/N/e/P/4397k+nfg53P3c2v/H28CfyL/x+CfiO4f/G+xS3H/
+zO179H3S4f8+9x/G/3f8e5n/a4f/O0P9X0q/IeU5yP68xP0m9m9a/3jO2Tfae79J3/X645yO+1z+
+fO3+s0X1j+/5S9S3/p/f2RfeP3m+31eP1+H/wfp3k39s9H9f6/7e
+/3d//5IeT0v5LykpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkpKSkp/R/I3/Rk
+hLg=" class="logo-img" alt="Ripley.com">
+    </div>
+
     <!-- MENÚ PRINCIPAL -->
     <div id="viewMenu" class="menu-box">
       <h2>Gestión de Equipos RPOS</h2>
@@ -207,7 +247,7 @@
       <button class="btn-volver" onclick="mostrarMenu()">← Volver al Menú</button>
     </div>
 
-    <!-- MARCA DE AGUA VISIBLE EN LA TARJETA -->
+    <!-- MARCA DE AGUA VISIBLE -->
     <div class="watermark">
       Desarrollado por Jose Manuel Jara Barbe &copy; 2026
     </div>
@@ -215,7 +255,7 @@
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxYHNm1S4n4ugMWcJjylDzACoGz7NrGHLojLG6rHn5oXZ3uo6qZsv_WuMIAyI23vSryrQ/exec"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec"; 
     
     let accionActual = "retiro";
     let timerReset = null;
