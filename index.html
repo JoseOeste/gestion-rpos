@@ -158,10 +158,10 @@
 
       <div class="input-group">
         <label for="inputEquipo">N° de Equipo:</label>
-        <input type="text" id="inputEquipo" placeholder="Escribir N° de RPOS..." autocomplete="off">
+        <input type="text" id="inputEquipo" placeholder="Pistolear o escribir equipo..." autocomplete="off">
       </div>
 
-      <div class="input-group">
+      <div class="input-group" id="groupRut">
         <label for="inputRut">RUT de la Persona:</label>
         <input type="text" id="inputRut" placeholder="Esperando equipo..." disabled autocomplete="off">
       </div>
@@ -173,8 +173,7 @@
   </div>
 
   <script>
-    // URL de tu Web App desplegada en Google Apps Script
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxWo0OgNLxeAQ3CbFJiBwnq7HErxM4gRpxvj44e4hXbLpyiZO4WsoPeT4dYwXLjIjRshg/exec"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec"; 
     
     let accionActual = "retiro";
     let timerReset = null;
@@ -184,6 +183,7 @@
     const formTitle = document.getElementById("formTitle");
     const inputEquipo = document.getElementById("inputEquipo");
     const inputRut = document.getElementById("inputRut");
+    const groupRut = document.getElementById("groupRut");
     const statusBox = document.getElementById("statusBox");
     const btnGuardar = document.getElementById("btnGuardar");
 
@@ -193,11 +193,13 @@
       viewForm.style.display = "block";
 
       if (modo === "retiro") {
-        formTitle.innerText = "Retiro RPOS";
+        formTitle.innerText = "Retiro RPOS (Estado: Retirado)";
         formTitle.style.color = "#2980b9";
+        groupRut.style.display = "block";
       } else {
-        formTitle.innerText = "Entrega RPOS";
+        formTitle.innerText = "Entrega RPOS (Estado: Entregado)";
         formTitle.style.color = "#27ae60";
+        groupRut.style.display = "none"; // Oculta el campo RUT en Entregas
       }
 
       resetFormulario();
@@ -219,7 +221,11 @@
       btnGuardar.disabled = true;
       btnGuardar.innerText = "💾 Guardar Registro";
 
-      statusBox.innerText = "Escriba N° de RPOS";
+      if (accionActual === "retiro") {
+        statusBox.innerText = "Paso 1: Pistolea o escribe el código del EQUIPO";
+      } else {
+        statusBox.innerText = "Pistolea o escribe el código del EQUIPO a devolver";
+      }
       statusBox.className = "status";
 
       setTimeout(() => inputEquipo.focus(), 50);
@@ -229,32 +235,40 @@
       return str.trim().toUpperCase();
     }
 
-    // Procesa el valor del equipo cuando se presiona ENTER, se hace clic fuera o se cambia de casilla
     function procesarEquipo() {
       if (inputEquipo.disabled) return;
       const valorEquipo = limpiarTexto(inputEquipo.value);
 
       if (valorEquipo !== "") {
         inputEquipo.value = valorEquipo;
-        inputEquipo.disabled = true;
 
-        inputRut.disabled = false;
-        statusBox.innerText = "Escriba su N° de rut";
-        statusBox.className = "status status-step2";
-        
-        // Habilita el guardado si el RUT ya tiene texto
-        if (inputRut.value.trim() !== "") {
+        if (accionActual === "retiro") {
+          inputEquipo.disabled = true;
+          inputRut.disabled = false;
+          statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
+          statusBox.className = "status status-step2";
+          
+          if (inputRut.value.trim() !== "") {
+            btnGuardar.disabled = false;
+          } else {
+            inputRut.focus();
+          }
+        } else {
+          // En entrega, al ingresar el equipo ya queda listo para guardar
           btnGuardar.disabled = false;
+          statusBox.innerText = "Haz clic en 'Guardar Registro' o presiona ENTER";
+          statusBox.className = "status status-step2";
         }
       }
     }
 
-    // Eventos para el campo EQUIPO (Enter, perder el foco o clic fuera)
     inputEquipo.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
         procesarEquipo();
-        inputRut.focus();
+        if (accionActual === "entrega" && inputEquipo.value.trim() !== "") {
+          confirmarYGuardar();
+        }
       }
     });
 
@@ -262,7 +276,12 @@
       procesarEquipo();
     });
 
-    // Eventos para el campo RUT (Enter o habilitar botón al escribir/hacer clic)
+    inputEquipo.addEventListener("input", function() {
+      if (accionActual === "entrega") {
+        btnGuardar.disabled = (inputEquipo.value.trim() === "");
+      }
+    });
+
     inputRut.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -271,19 +290,20 @@
     });
 
     inputRut.addEventListener("input", function() {
-      btnGuardar.disabled = (inputRut.value.trim() === "");
+      if (accionActual === "retiro") {
+        btnGuardar.disabled = (inputRut.value.trim() === "");
+      }
     });
 
-    inputRut.addEventListener("blur", function() {
-      btnGuardar.disabled = (inputRut.value.trim() === "");
-    });
-
-    // Función ejecutada al presionar Guardar o presionar Enter
     function confirmarYGuardar() {
-      const rut = limpiarTexto(inputRut.value);
       const equipo = limpiarTexto(inputEquipo.value);
+      const rut = limpiarTexto(inputRut.value);
 
-      if (equipo !== "" && rut !== "" && !btnGuardar.disabled) {
+      if (accionActual === "retiro" && (equipo === "" || rut === "")) return;
+      if (accionActual === "entrega" && equipo === "") return;
+
+      if (!btnGuardar.disabled) {
+        inputEquipo.disabled = true;
         inputRut.disabled = true;
         btnGuardar.disabled = true;
         btnGuardar.innerText = "⏳ Guardando...";
@@ -295,7 +315,6 @@
       }
     }
 
-    // Envío a Google Apps Script
     function guardarRegistro(equipo, rut) {
       const payload = {
         accion: accionActual,
