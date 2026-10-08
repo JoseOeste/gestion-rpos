@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión RPOS</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background-color: #f4f6f9; 
+      margin: 0; 
+      padding: 40px 20px; 
+    }
+    .container { 
+      max-width: 500px; 
+      margin: 0 auto; 
+      background: white; 
+      padding: 30px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    }
+    h2 { 
+      text-align: center; 
+      color: #1a252f; 
+      margin-top: 0;
+      margin-bottom: 25px; 
+    }
+    
+    .menu-box { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 15px; 
+    }
+    .btn-menu { 
+      padding: 18px; 
+      font-size: 18px; 
+      font-weight: bold; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: background-color 0.2s, transform 0.1s; 
+    }
+    .btn-menu:active {
+      transform: scale(0.98);
+    }
+    .btn-retiro { background-color: #2980b9; }
+    .btn-retiro:hover { background-color: #1f618d; }
+    .btn-entrega { background-color: #27ae60; }
+    .btn-entrega:hover { background-color: #1e8449; }
+    
+    .btn-guardar {
+      background-color: #2c3e50;
+      color: white;
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+    .btn-guardar:hover { background-color: #1a252f; }
+    .btn-guardar:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .btn-volver { 
+      background-color: #7f8c8d; 
+      margin-top: 10px; 
+      padding: 12px; 
+      width: 100%; 
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-volver:hover { background-color: #626d6e; }
+
+    .view-section { display: none; }
+    .input-group { margin-bottom: 20px; }
+    label { 
+      display: block; 
+      font-weight: bold; 
+      margin-bottom: 8px; 
+      color: #34495e; 
+    }
+    input { 
+      width: 100%; 
+      padding: 12px; 
+      font-size: 16px; 
+      border: 2px solid #bdc3c7; 
+      border-radius: 6px; 
+      box-sizing: border-box; 
+      outline: none; 
+      transition: border-color 0.2s;
+    }
+    input:focus { 
+      border-color: #3498db; 
+      background-color: #eaf2f8; 
+    }
+    input:disabled {
+      background-color: #f2f4f4;
+      cursor: not-allowed;
+    }
+    
+    .status { 
+      padding: 14px; 
+      font-weight: bold; 
+      text-align: center; 
+      border-radius: 6px; 
+      margin-bottom: 20px; 
+      background-color: #ebf5fb; 
+      color: #2980b9; 
+      border: 1px solid #aed6f1; 
+      cursor: pointer;
+      user-select: none;
+    }
+    .status-step2 {
+      background-color: #fef9e7;
+      color: #7d6608;
+      border-color: #f9e79f;
+    }
+    .success { 
+      background-color: #d4edda; 
+      color: #155724; 
+      border-color: #c3e6cb; 
+    }
+    .danger { 
+      background-color: #f8d7da; 
+      color: #721c24; 
+      border-color: #f5c6cb; 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- MENÚ PRINCIPAL -->
+    <div id="viewMenu" class="menu-box">
+      <h2>Gestión de Equipos RPOS</h2>
+      <button class="btn-menu btn-retiro" onclick="abrirModulo('retiro')">Retiro RPOS</button>
+      <button class="btn-menu btn-entrega" onclick="abrirModulo('entrega')">Entrega RPOS</button>
+    </div>
+
+    <!-- MÓDULO FORMULARIO -->
+    <div id="viewForm" class="view-section">
+      <h2 id="formTitle">Retiro RPOS</h2>
+
+      <div id="statusBox" class="status" onclick="resetFormulario()" title="Haz clic para reiniciar">
+        Paso 1: Pistolea o escribe el código del EQUIPO
+      </div>
+
+      <div class="input-group">
+        <label for="inputEquipo">N° de Equipo:</label>
+        <input type="text" id="inputEquipo" placeholder="Escribir N° de RPOS..." autocomplete="off">
+      </div>
+
+      <div class="input-group">
+        <label for="inputRut">RUT de la Persona:</label>
+        <input type="text" id="inputRut" placeholder="Esperando equipo..." disabled autocomplete="off">
+      </div>
+
+      <button id="btnGuardar" class="btn-guardar" onclick="confirmarYGuardar()" disabled>💾 Guardar Registro</button>
+      <button class="btn-volver" onclick="mostrarMenu()">← Volver al Menú</button>
+    </div>
+
+  </div>
+
+  <script>
+    // URL de tu Web App desplegada en Google Apps Script
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxWo0OgNLxeAQ3CbFJiBwnq7HErxM4gRpxvj44e4hXbLpyiZO4WsoPeT4dYwXLjIjRshg/exec"; 
+    
+    let accionActual = "retiro";
+    let timerReset = null;
+
+    const viewMenu = document.getElementById("viewMenu");
+    const viewForm = document.getElementById("viewForm");
+    const formTitle = document.getElementById("formTitle");
+    const inputEquipo = document.getElementById("inputEquipo");
+    const inputRut = document.getElementById("inputRut");
+    const statusBox = document.getElementById("statusBox");
+    const btnGuardar = document.getElementById("btnGuardar");
+
+    function abrirModulo(modo) {
+      accionActual = modo;
+      viewMenu.style.display = "none";
+      viewForm.style.display = "block";
+
+      if (modo === "retiro") {
+        formTitle.innerText = "Retiro RPOS";
+        formTitle.style.color = "#2980b9";
+      } else {
+        formTitle.innerText = "Entrega RPOS";
+        formTitle.style.color = "#27ae60";
+      }
+
+      resetFormulario();
+    }
+
+    function mostrarMenu() {
+      if (timerReset) clearTimeout(timerReset);
+      viewForm.style.display = "none";
+      viewMenu.style.display = "flex";
+    }
+
+    function resetFormulario() {
+      if (timerReset) clearTimeout(timerReset);
+
+      inputEquipo.value = "";
+      inputRut.value = "";
+      inputEquipo.disabled = false;
+      inputRut.disabled = true;
+      btnGuardar.disabled = true;
+      btnGuardar.innerText = "💾 Guardar Registro";
+
+      statusBox.innerText = "Escriba N° de RPOS";
+      statusBox.className = "status";
+
+      setTimeout(() => inputEquipo.focus(), 50);
+    }
+
+    function limpiarTexto(str) {
+      return str.trim().toUpperCase();
+    }
+
+    // Procesa el valor del equipo cuando se presiona ENTER, se hace clic fuera o se cambia de casilla
+    function procesarEquipo() {
+      if (inputEquipo.disabled) return;
+      const valorEquipo = limpiarTexto(inputEquipo.value);
+
+      if (valorEquipo !== "") {
+        inputEquipo.value = valorEquipo;
+        inputEquipo.disabled = true;
+
+        inputRut.disabled = false;
+        statusBox.innerText = "Escriba su N° de rut";
+        statusBox.className = "status status-step2";
+        
+        // Habilita el guardado si el RUT ya tiene texto
+        if (inputRut.value.trim() !== "") {
+          btnGuardar.disabled = false;
+        }
+      }
+    }
+
+    // Eventos para el campo EQUIPO (Enter, perder el foco o clic fuera)
+    inputEquipo.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        procesarEquipo();
+        inputRut.focus();
+      }
+    });
+
+    inputEquipo.addEventListener("blur", function() {
+      procesarEquipo();
+    });
+
+    // Eventos para el campo RUT (Enter o habilitar botón al escribir/hacer clic)
+    inputRut.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        confirmarYGuardar();
+      }
+    });
+
+    inputRut.addEventListener("input", function() {
+      btnGuardar.disabled = (inputRut.value.trim() === "");
+    });
+
+    inputRut.addEventListener("blur", function() {
+      btnGuardar.disabled = (inputRut.value.trim() === "");
+    });
+
+    // Función ejecutada al presionar Guardar o presionar Enter
+    function confirmarYGuardar() {
+      const rut = limpiarTexto(inputRut.value);
+      const equipo = limpiarTexto(inputEquipo.value);
+
+      if (equipo !== "" && rut !== "" && !btnGuardar.disabled) {
+        inputRut.disabled = true;
+        btnGuardar.disabled = true;
+        btnGuardar.innerText = "⏳ Guardando...";
+
+        statusBox.innerText = "Verificando y guardando...";
+        statusBox.className = "status";
+
+        guardarRegistro(equipo, rut);
+      }
+    }
+
+    // Envío a Google Apps Script
+    function guardarRegistro(equipo, rut) {
+      const payload = {
+        accion: accionActual,
+        equipo: equipo,
+        rut: rut,
+        fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
+      };
+
+      fetch(URL_SCRIPT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Error en la respuesta de la red");
+        return response.json();
+      })
+      .then(res => {
+        if (res.status === "OK") {
+          statusBox.innerText = res.mensaje || "¡Registro exitoso!";
+          statusBox.className = "status success";
+          timerReset = setTimeout(resetFormulario, 2000);
+        } else {
+          statusBox.innerText = res.mensaje || "Atención: No se pudo registrar";
+          statusBox.className = "status danger";
+          timerReset = setTimeout(resetFormulario, 4000);
+        }
+      })
+      .catch(err => {
+        statusBox.innerText = "Error de conexión con el servidor";
+        statusBox.className = "status danger";
+        console.error(err);
+        timerReset = setTimeout(resetFormulario, 3500);
+      });
+    }
+  </script>
+</body>
+</html>
