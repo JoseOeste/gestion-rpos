@@ -1,3 +1,11 @@
+<!--
+===================================================================
+  SISTEMA DE GESTIÓN Y AUDITORÍA DE EQUIPOS RPOS
+  Desarrollado por: Jose Manuel Jara Barbe
+  Año: 2026
+  Todos los derechos reservados.
+===================================================================
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,6 +19,22 @@
       margin: 0; 
       padding: 40px 20px; 
     }
+    
+    /* Marca de agua de fondo tenue */
+    body::before {
+      content: "PROPIEDAD DE JOSE MANUEL JARA - RPOS";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 32px;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.025);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
     .container { 
       max-width: 500px; 
       margin: 0 auto; 
@@ -18,6 +42,7 @@
       padding: 30px; 
       border-radius: 12px; 
       box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+      position: relative;
     }
     h2 { 
       text-align: center; 
@@ -135,6 +160,18 @@
       color: #721c24; 
       border-color: #f5c6cb; 
     }
+
+    /* Estilo Marca de Agua Pie de Página */
+    .watermark {
+      text-align: center;
+      font-size: 11px;
+      color: #a0aec0;
+      margin-top: 25px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -170,10 +207,15 @@
       <button class="btn-volver" onclick="mostrarMenu()">← Volver al Menú</button>
     </div>
 
+    <!-- MARCA DE AGUA VISIBLE EN LA TARJETA -->
+    <div class="watermark">
+      Desarrollado por Jose Manuel Jara Barbe &copy; 2026
+    </div>
+
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbz2jhham_xc_WORKvjkIHOiKmlSWBgUkR7DEbLk-FLWi5mxiU69AgUCa2nENjjZW777dQ/exec"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec"; 
     
     let accionActual = "retiro";
     let timerReset = null;
@@ -199,7 +241,7 @@
       } else {
         formTitle.innerText = "Entrega RPOS (Estado: Entregado)";
         formTitle.style.color = "#27ae60";
-        groupRut.style.display = "none"; // Oculta el campo RUT en Entregas
+        groupRut.style.display = "none";
       }
 
       resetFormulario();
@@ -254,7 +296,6 @@
             inputRut.focus();
           }
         } else {
-          // En entrega, al ingresar el equipo ya queda listo para guardar
           btnGuardar.disabled = false;
           statusBox.innerText = "Haz clic en 'Guardar Registro' o presiona ENTER";
           statusBox.className = "status status-step2";
