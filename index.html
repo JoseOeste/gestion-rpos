@@ -325,3 +325,142 @@
       btnGuardar.innerText = "💾 Guardar Registro";
 
       if (accionActual === "retiro") {
+        statusBox.innerText = "Paso 1: Pistolea o escribe el código del EQUIPO";
+      } else {
+        statusBox.innerText = "Pistolea o escribe el código del EQUIPO a devolver";
+      }
+      statusBox.className = "status";
+
+      setTimeout(() => inputEquipo.focus(), 50);
+    }
+
+    function limpiarTexto(str) {
+      return str.trim().toUpperCase();
+    }
+
+    function procesarEquipo() {
+      const valorEquipo = limpiarTexto(inputEquipo.value);
+
+      if (valorEquipo !== "") {
+        inputEquipo.value = valorEquipo;
+
+        if (accionActual === "retiro") {
+          if (!inputEquipo.disabled) {
+            inputEquipo.disabled = true;
+            inputRut.disabled = false;
+            statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
+            statusBox.className = "status status-step2";
+            
+            if (inputRut.value.trim() !== "") {
+              btnGuardar.disabled = false;
+            } else {
+              inputRut.focus();
+            }
+          }
+        } else {
+          btnGuardar.disabled = false;
+          statusBox.innerText = "Haz clic en 'Guardar Registro' o presiona ENTER";
+          statusBox.className = "status status-step2";
+        }
+      }
+    }
+
+    inputEquipo.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        procesarEquipo();
+        if (accionActual === "entrega" && inputEquipo.value.trim() !== "") {
+          confirmarYGuardar();
+        }
+      }
+    });
+
+    inputEquipo.addEventListener("blur", function() {
+      procesarEquipo();
+    });
+
+    inputEquipo.addEventListener("input", function() {
+      const valor = inputEquipo.value.trim();
+      if (accionActual === "entrega") {
+        btnGuardar.disabled = (valor === "");
+        if (valor !== "") {
+          statusBox.innerText = "Haz clic en 'Guardar Registro' o presiona ENTER";
+          statusBox.className = "status status-step2";
+        } else {
+          statusBox.innerText = "Pistolea o escribe el código del EQUIPO a devolver";
+          statusBox.className = "status";
+        }
+      }
+    });
+
+    inputRut.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        confirmarYGuardar();
+      }
+    });
+
+    inputRut.addEventListener("input", function() {
+      if (accionActual === "retiro") {
+        btnGuardar.disabled = (inputRut.value.trim() === "");
+      }
+    });
+
+    function confirmarYGuardar() {
+      const equipo = limpiarTexto(inputEquipo.value);
+      const rut = limpiarTexto(inputRut.value);
+
+      if (accionActual === "retiro" && (equipo === "" || rut === "")) return;
+      if (accionActual === "entrega" && equipo === "") return;
+
+      if (!btnGuardar.disabled) {
+        inputEquipo.disabled = true;
+        inputRut.disabled = true;
+        btnGuardar.disabled = true;
+        btnGuardar.innerText = "⏳ Guardando...";
+
+        statusBox.innerText = "Verificando y guardando...";
+        statusBox.className = "status";
+
+        guardarRegistro(equipo, rut);
+      }
+    }
+
+    function guardarRegistro(equipo, rut) {
+      const payload = {
+        accion: accionActual,
+        equipo: equipo,
+        rut: (accionActual === "retiro") ? rut : "",
+        fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
+      };
+
+      fetch(URL_SCRIPT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Error en la respuesta de la red");
+        return response.json();
+      })
+      .then(res => {
+        if (res.status === "OK") {
+          statusBox.innerText = res.mensaje || "¡Registro exitoso!";
+          statusBox.className = "status success";
+          timerReset = setTimeout(resetFormulario, 2000);
+        } else {
+          statusBox.innerText = res.mensaje || "Atención: No se pudo registrar";
+          statusBox.className = "status danger";
+          timerReset = setTimeout(resetFormulario, 4000);
+        }
+      })
+      .catch(err => {
+        statusBox.innerText = "Error de conexión con el servidor";
+        statusBox.className = "status danger";
+        console.error(err);
+        timerReset = setTimeout(resetFormulario, 3500);
+      });
+    }
+  </script>
+</body>
+</html>
