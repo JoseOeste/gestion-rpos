@@ -44,7 +44,6 @@
       position: relative;
     }
 
-    /* ESTILO PARA EL LOGO RIPLEY */
     .logo-container {
       text-align: center;
       margin-bottom: 20px;
@@ -230,7 +229,7 @@
 
   <div class="container">
     
-    <!-- LOGOTIPO RIPLEY EMBEBIDO (100% GARANTIZADO) -->
+    <!-- LOGOTIPO RIPLEY EMBEBIDO -->
     <div class="logo-container">
       <div style="display: inline-flex; align-items: center;">
         <div class="ripley-logo-box">
@@ -270,7 +269,6 @@
       <button class="btn-volver" onclick="mostrarMenu()">← Volver al Menú</button>
     </div>
 
-    <!-- MARCA DE AGUA VISIBLE -->
     <div class="watermark">
       Desarrollado por Jose Manuel Jara Barbe &copy; 2026
     </div>
@@ -278,7 +276,7 @@
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyQOmRKyfSFikr0c0zo2INUCJCH_JdmLvH_CCBryfpVSYJfFrHCfodqSxhBz_Dhfxvcpw/exec"; 
     
     let accionActual = "retiro";
     let timerReset = null;
@@ -341,24 +339,26 @@
     }
 
     function procesarEquipo() {
-      if (inputEquipo.disabled) return;
       const valorEquipo = limpiarTexto(inputEquipo.value);
 
       if (valorEquipo !== "") {
         inputEquipo.value = valorEquipo;
 
         if (accionActual === "retiro") {
-          inputEquipo.disabled = true;
-          inputRut.disabled = false;
-          statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
-          statusBox.className = "status status-step2";
-          
-          if (inputRut.value.trim() !== "") {
-            btnGuardar.disabled = false;
-          } else {
-            inputRut.focus();
+          if (!inputEquipo.disabled) {
+            inputEquipo.disabled = true;
+            inputRut.disabled = false;
+            statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
+            statusBox.className = "status status-step2";
+            
+            if (inputRut.value.trim() !== "") {
+              btnGuardar.disabled = false;
+            } else {
+              inputRut.focus();
+            }
           }
         } else {
+          // MÓDULO ENTREGA: Solo habilita botón inmediatamente al tener el equipo
           btnGuardar.disabled = false;
           statusBox.innerText = "Haz clic en 'Guardar Registro' o presiona ENTER";
           statusBox.className = "status status-step2";
@@ -381,8 +381,16 @@
     });
 
     inputEquipo.addEventListener("input", function() {
+      const valor = inputEquipo.value.trim();
       if (accionActual === "entrega") {
-        btnGuardar.disabled = (inputEquipo.value.trim() === "");
+        btnGuardar.disabled = (valor === "");
+        if (valor !== "") {
+          statusBox.innerText = "Haz clic en 'Guardar Registro' o presiona ENTER";
+          statusBox.className = "status status-step2";
+        } else {
+          statusBox.innerText = "Pistolea o escribe el código del EQUIPO a devolver";
+          statusBox.className = "status";
+        }
       }
     });
 
@@ -403,6 +411,7 @@
       const equipo = limpiarTexto(inputEquipo.value);
       const rut = limpiarTexto(inputRut.value);
 
+      // VALIDACIÓN CORREGIDA: En 'entrega' únicamente exige código de equipo
       if (accionActual === "retiro" && (equipo === "" || rut === "")) return;
       if (accionActual === "entrega" && equipo === "") return;
 
@@ -423,7 +432,7 @@
       const payload = {
         accion: accionActual,
         equipo: equipo,
-        rut: rut,
+        rut: (accionActual === "retiro") ? rut : "",
         fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
       };
 
