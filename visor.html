@@ -140,7 +140,7 @@
         <button class="btn-today" onclick="cargarDatosHoy()">📅 Ver Hoy</button>
       </div>
       <div class="control-group">
-        <label for="fechaConsulta">Buscar Día Pasado:</label>
+        <label for="fechaConsulta">Busca otra fecha:</label>
         <input type="date" id="fechaConsulta">
         <button class="btn-search" onclick="cargarDatosHistoricos()">🔍 Consultar</button>
       </div>
@@ -152,7 +152,6 @@
       <table id="tablaVisor">
         <thead>
           <tr id="headersTabla">
-            <th>RUT</th>
             <th>Nombre</th>
             <th>Área</th>
             <th>Equipo</th>
@@ -162,7 +161,7 @@
           </tr>
         </thead>
         <tbody id="cuerpoTabla">
-          <tr><td colspan="7" style="text-align:center;">Cargando datos...</td></tr>
+          <tr><td colspan="6" style="text-align:center;">Cargando datos...</td></tr>
         </tbody>
       </table>
     </div>
@@ -173,9 +172,14 @@
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxpfCexOF52uR31ooxi3r0Zliw-FYM92gghnxp2DtOECr24Ev9vRtRSL0OfoTazBvjVGw/exec";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec";
 
     document.addEventListener("DOMContentLoaded", function() {
+      // Establecer la fecha máxima permitida en el input date (hoy)
+      const inputFecha = document.getElementById("fechaConsulta");
+      const hoyStr = new Date().toISOString().split("T")[0];
+      inputFecha.max = hoyStr;
+
       cargarDatosHoy();
     });
 
@@ -211,8 +215,23 @@
     }
 
     function cargarDatosHistoricos() {
-      const fecha = document.getElementById("fechaConsulta").value;
-      if (!fecha) { mostrarMensaje("Por favor seleccione una fecha.", "danger"); return; }
+      const inputFecha = document.getElementById("fechaConsulta");
+      const fecha = inputFecha.value;
+
+      if (!fecha) { 
+        mostrarMensaje("Por favor seleccione una fecha.", "danger"); 
+        return; 
+      }
+
+      // Validar que la fecha no sea futura
+      const fechaSeleccionada = new Date(fecha + "T00:00:00");
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+
+      if (fechaSeleccionada > hoy) {
+        mostrarMensaje("⚠️ No se pueden consultar fechas futuras. Seleccione una fecha pasada o el día de hoy.", "danger");
+        return;
+      }
 
       mostrarMensaje("Buscando respaldo en Google Drive...", "info");
 
@@ -242,7 +261,7 @@
       tbody.innerHTML = "";
 
       if (!datos || datos.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${esHistorico ? 7 : 6}" style="text-align:center;">No hay registros para mostrar.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${esHistorico ? 6 : 5}" style="text-align:center;">No hay registros para mostrar.</td></tr>`;
         return;
       }
 
@@ -251,7 +270,6 @@
         const claseBadge = item.estado.toLowerCase() === "retirado" ? "badge-retirado" : "badge-entregado";
 
         let htmlRow = `
-          <td>${item.rut || 'N/I'}</td>
           <td>${item.nombre}</td>
           <td>${item.area}</td>
           <td><b>${item.equipo}</b></td>
