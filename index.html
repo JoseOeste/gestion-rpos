@@ -2,14 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control RPOS Ripley</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
     .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     h2 { text-align: center; color: #1a252f; margin-bottom: 20px; }
     
-    /* Sistema de Pestañas (Tabs) */
+    /* Pestañas (Tabs) superiores */
     .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #bdc3c7; }
     .tab-btn { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; background: #ecf0f1; border: none; cursor: pointer; color: #7f8c8d; transition: all 0.2s; }
     .tab-btn.active { background: white; color: #2c3e50; border-bottom: 3px solid #3498db; }
@@ -19,11 +19,12 @@
     .input-group { margin-bottom: 20px; }
     label { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
     
-    /* Previene el zoom en móviles fijando el tamaño de fuente en 16px */
-    input { width: 100%; padding: 12px; font-size: 16px !important; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; -webkit-appearance: none; }
+    input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; }
     input:focus { border-color: #3498db; background-color: #eaf2f8; }
+    input:disabled { background-color: #f2f4f4; cursor: not-allowed; }
     
-    .status { padding: 14px; font-weight: bold; text-align: center; border-radius: 6px; margin-bottom: 20px; background-color: #ebf5fb; color: #2980b9; border: 1px solid #aed6f1; }
+    .status { padding: 14px; font-weight: bold; text-align: center; border-radius: 6px; margin-bottom: 20px; background-color: #ebf5fb; color: #2980b9; border: 1px solid #aed6f1; cursor: pointer; }
+    .status-step2 { background-color: #fef9e7; color: #7d6608; border-color: #f9e79f; }
     .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
     .danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
 
@@ -45,10 +46,7 @@
       <button id="tabEntrega" class="tab-btn" onclick="cambiarTab('entrega')">📤 Entrega RPOS</button>
     </div>
 
-    <!-- Título Dinámico de la Sección -->
-    <h3 id="formTitle" style="text-align: center; color: #2980b9; margin-top: 0;">Retiro de Equipos</h3>
-
-    <div id="statusBox" class="status">
+    <div id="statusBox" class="status" onclick="resetFormulario()" title="Haz clic para reiniciar">
       Paso 1: Pistolea el código del EQUIPO
     </div>
 
@@ -73,21 +71,20 @@
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwdavfXoehjCXFE-HZhZUYHUah1BrTXjI61tmbQKwyUb73GO6CCUuFsLOdFaGVds7sKaw/exec"; // Tu URL de Google Apps Script
+    // URL de tu Web App de Google Apps Script (Terminada en /exec)
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwdavfXoehjCXFE-HZhZUYHUah1BrTXjI61tmbQKwyUb73GO6CCUuFsLOdFaGVds7sKaw/exec"; 
     
     let modoActual = "retiro"; // "retiro" o "entrega"
     let timerReset = null;
 
     const tabRetiro = document.getElementById("tabRetiro");
     const tabEntrega = document.getElementById("tabEntrega");
-    const formTitle = document.getElementById("formTitle");
     const inputEquipo = document.getElementById("inputEquipo");
     const inputRut = document.getElementById("inputRut");
     const groupRut = document.getElementById("groupRut");
     const statusBox = document.getElementById("statusBox");
     const btnGuardar = document.getElementById("btnGuardar");
 
-    // Cambiar entre pestañas
     function cambiarTab(modo) {
       if (timerReset) clearTimeout(timerReset);
       modoActual = modo;
@@ -97,13 +94,9 @@
 
       if (modo === "retiro") {
         tabRetiro.classList.add("active");
-        formTitle.innerText = "Retiro de Equipos";
-        formTitle.style.color = "#2980b9";
         groupRut.style.display = "block";
       } else {
         tabEntrega.classList.add("active");
-        formTitle.innerText = "Entrega / Devolución de Equipos";
-        formTitle.style.color = "#27ae60";
         groupRut.style.display = "none"; // En entrega no se pide RUT
       }
 
@@ -135,13 +128,29 @@
       return str ? str.trim().toUpperCase() : "";
     }
 
-    // Input en campo equipo
+    function procesarEquipoRetiro() {
+      if (inputEquipo.disabled) return;
+      const val = limpiarTexto(inputEquipo.value);
+      if (val !== "") {
+        inputEquipo.value = val;
+        inputEquipo.disabled = true;
+        inputRut.disabled = false;
+        inputRut.focus();
+        statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
+        statusBox.className = "status status-step2";
+        if (inputRut.value.trim() !== "") {
+          btnGuardar.disabled = false;
+        }
+      }
+    }
+
     inputEquipo.addEventListener("input", function() {
-      const valor = inputEquipo.value.trim();
+      const val = inputEquipo.value.trim();
       if (modoActual === "entrega") {
-        btnGuardar.disabled = (valor === "");
-        if (valor !== "") {
+        btnGuardar.disabled = (val === "");
+        if (val !== "") {
           statusBox.innerText = "Equipo listo. Presiona Guardar o Enter";
+          statusBox.className = "status status-step2";
         }
       }
     });
@@ -149,24 +158,22 @@
     inputEquipo.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        const valorEquipo = limpiarTexto(inputEquipo.value);
-        if (valorEquipo === "") return;
-
         if (modoActual === "retiro") {
-          inputEquipo.disabled = true;
-          inputRut.disabled = false;
-          inputRut.focus();
-          statusBox.innerText = "Paso 2: Pistolea el RUT de la persona";
-          statusBox.style.backgroundColor = "#fef9e7";
-          statusBox.style.color = "#7d6608";
+          procesarEquipoRetiro();
         } else {
-          // Si es entrega y presiona Enter, guarda directamente
-          confirmarYGuardar();
+          if (limpiarTexto(inputEquipo.value) !== "") {
+            confirmarYGuardar();
+          }
         }
       }
     });
 
-    // Input en campo RUT (Solo retiro)
+    inputEquipo.addEventListener("blur", function() {
+      if (modoActual === "retiro" && !inputEquipo.disabled) {
+        procesarEquipoRetiro();
+      }
+    });
+
     inputRut.addEventListener("input", function() {
       if (modoActual === "retiro") {
         btnGuardar.disabled = (inputRut.value.trim() === "");
@@ -182,7 +189,6 @@
       }
     });
 
-    // Enviar datos al servidor
     function confirmarYGuardar() {
       const equipo = limpiarTexto(inputEquipo.value);
       const rut = limpiarTexto(inputRut.value);
@@ -192,7 +198,7 @@
 
       // Bloquear controles y mostrar estado de carga
       inputEquipo.disabled = true;
-      if (modoActual === "retiro") inputRut.disabled = true;
+      inputRut.disabled = true;
       btnGuardar.disabled = true;
       btnGuardar.innerText = "⏳ Guardando...";
 
@@ -223,7 +229,6 @@
           statusBox.innerText = res.mensaje || "Atención: No se pudo registrar";
           statusBox.className = "status danger";
         }
-        // Reactiva y limpia el formulario automáticamente
         timerReset = setTimeout(resetFormulario, 2000);
       })
       .catch(err => {
@@ -234,7 +239,6 @@
       });
     }
 
-    // Inicializar al cargar la página
     window.onload = () => resetFormulario();
   </script>
 </body>
