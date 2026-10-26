@@ -172,10 +172,9 @@
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxpfCexOF52uR31ooxi3r0Zliw-FYM92gghnxp2DtOECr24Ev9vRtRSL0OfoTazBvjVGw/exec";
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec";
 
     document.addEventListener("DOMContentLoaded", function() {
-      // Establecer la fecha máxima permitida en el input date (hoy)
       const inputFecha = document.getElementById("fechaConsulta");
       const hoyStr = new Date().toISOString().split("T")[0];
       inputFecha.max = hoyStr;
@@ -194,11 +193,8 @@
       mostrarMensaje("Cargando información del día...", "info");
       document.getElementById("thDevolucion").style.display = "none";
 
-      fetch(URL_SCRIPT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: "obtener_dia" })
-      })
+      // Petición GET compatible con GitHub Pages
+      fetch(URL_SCRIPT + "?accion=obtener_dia")
       .then(r => r.json())
       .then(res => {
         mostrarMensaje("", "");
@@ -223,7 +219,6 @@
         return; 
       }
 
-      // Validar que la fecha no sea futura
       const fechaSeleccionada = new Date(fecha + "T00:00:00");
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
@@ -235,11 +230,8 @@
 
       mostrarMensaje("Buscando respaldo en Google Drive...", "info");
 
-      fetch(URL_SCRIPT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: "obtener_historico", fecha: fecha })
-      })
+      // Petición GET compatible con GitHub Pages
+      fetch(URL_SCRIPT + "?accion=obtener_historico&fecha=" + encodeURIComponent(fecha))
       .then(r => r.json())
       .then(res => {
         mostrarMensaje("", "");
@@ -269,7 +261,7 @@
         const tr = document.createElement("tr");
         const claseBadge = item.estado.toLowerCase() === "retirado" ? "badge-retirado" : "badge-entregado";
 
-        // Se eliminó la celda del RUT, manteniendo solo Nombre, Área, Equipo, Estado, Hora Retiro y (si aplica) Hora Devolución
+        // Se excluye el RUT por completo de las columnas mostradas
         let htmlRow = `
           <td>${item.nombre}</td>
           <td>${item.area}</td>
