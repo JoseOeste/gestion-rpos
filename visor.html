@@ -193,11 +193,7 @@
       mostrarMensaje("Cargando información del día...", "info");
       document.getElementById("thDevolucion").style.display = "none";
 
-      fetch(URL_SCRIPT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: "obtener_dia" })
-      })
+      fetch(URL_SCRIPT + "?accion=obtener_dia")
       .then(r => r.json())
       .then(res => {
         mostrarMensaje("", "");
@@ -233,11 +229,7 @@
 
       mostrarMensaje("Buscando respaldo en Google Drive...", "info");
 
-      fetch(URL_SCRIPT, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ accion: "obtener_historico", fecha: fecha })
-      })
+      fetch(URL_SCRIPT + "?accion=obtener_historico&fecha=" + encodeURIComponent(fecha))
       .then(r => r.json())
       .then(res => {
         mostrarMensaje("", "");
