@@ -22,7 +22,6 @@
     .input-group { margin-bottom: 20px; }
     label { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
     
-    /* Evita el zoom automático en dispositivos móviles manteniendo 16px */
     input { width: 100%; padding: 12px; font-size: 16px !important; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; }
     input:focus { border-color: #3498db; background-color: #eaf2f8; }
     
@@ -63,14 +62,16 @@
         <input type="text" id="inputRut" placeholder="Esperando equipo..." disabled autocomplete="off">
       </div>
 
-      <!-- Botón de Guardar explícito -->
+      <!-- Botón de Guardar -->
       <button id="btnGuardar" class="btn-guardar" onclick="confirmarYGuardar()" disabled>💾 Guardar Registro</button>
       <button class="btn-menu btn-volver" onclick="mostrarMenu()" style="width: 100%;">← Volver al Menú</button>
     </div>
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwdavfXoehjCXFE-HZhZUYHUah1BrTXjI61tmbQKwyUb73GO6CCUuFsLOdFaGVds7sKaw/exec"; // Tu URL de Google Apps Script
+    // URL de tu Web App de Google Apps Script
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwdavfXoehjCXFE-HZhZUYHUah1BrTXjI61tmbQKwyUb73GO6CCUuFsLOdFaGVds7sKaw/exec"; 
+    
     let accionActual = "retiro";
     let timerReset = null;
 
@@ -95,7 +96,7 @@
       } else {
         formTitle.innerText = "Entrega RPOS (Estado: Entregado)";
         formTitle.style.color = "#27ae60";
-        groupRut.style.display = "none"; // En entrega no se pide RUT
+        groupRut.style.display = "none"; // Oculta el campo RUT en entrega
       }
 
       resetFormulario();
@@ -121,7 +122,7 @@
         statusBox.innerText = "Paso 1: Pistolea o escribe el código del EQUIPO";
       } else {
         statusBox.innerText = "Pistolea o escribe el código del EQUIPO a devolver";
-        btnGuardar.disabled = false; // En entrega se habilita directo al escribir/pistolear el equipo
+        btnGuardar.disabled = false; // En entrega se habilita directo al escribir el equipo
       }
       statusBox.className = "status";
 
@@ -132,7 +133,7 @@
       return str ? str.trim().toUpperCase() : "";
     }
 
-    // Eventos y validaciones para el campo Equipo
+    // Eventos para el campo Equipo
     inputEquipo.addEventListener("input", function() {
       const valor = inputEquipo.value.trim();
       if (accionActual === "entrega") {
@@ -154,16 +155,14 @@
           inputRut.disabled = false;
           inputRut.focus();
           statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
-          statusBox.style.backgroundColor = "#fef9e7";
-          statusBox.style.color = "#7d6608";
         } else {
-          // Si es entrega y presiona enter en el equipo, guarda directamente
+          // Si es entrega y presiona enter, ejecuta el guardado directo
           confirmarYGuardar();
         }
       }
     });
 
-    // Eventos para el campo RUT (Solo modo retiro)
+    // Eventos para el campo RUT (Solo retiro)
     inputRut.addEventListener("input", function() {
       if (accionActual === "retiro") {
         btnGuardar.disabled = (inputRut.value.trim() === "");
@@ -179,7 +178,7 @@
       }
     });
 
-    // Función principal de envío que corrige el problema de bloqueo del botón
+    // Función principal que envía los datos y evita que el botón se quede pegado
     function confirmarYGuardar() {
       const equipo = limpiarTexto(inputEquipo.value);
       const rut = limpiarTexto(inputRut.value);
@@ -199,7 +198,7 @@
       const payload = {
         accion: accionActual,
         equipo: equipo,
-        rut: (accionActual === "retiro") ? rut : "",
+        rut: (accionActual === "retiro") ? rut : "", // Envía vacío si es entrega
         fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
       };
 
@@ -209,7 +208,7 @@
         body: JSON.stringify(payload)
       })
       .then(response => {
-        if (!response.ok) throw new Error("Error en la respuesta de la red");
+        if (!response.ok) throw new Error("Error en la red");
         return response.json();
       })
       .then(res => {
@@ -220,8 +219,8 @@
           statusBox.innerText = res.mensaje || "Atención: No se pudo registrar";
           statusBox.className = "status danger";
         }
-        // Siempre reactiva y limpia el formulario después de unos segundos sin importar el resultado
-        timerReset = setTimeout(resetFormulario, 2500);
+        // Se asegura de reactivar y limpiar el formulario pase lo que pase
+        timerReset = setTimeout(resetFormulario, 2000);
       })
       .catch(err => {
         statusBox.innerText = "Error de conexión con el servidor";
