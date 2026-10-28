@@ -6,8 +6,31 @@
   <title>Control RPOS Ripley</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-    .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #1a252f; margin-bottom: 20px; }
+    
+    body::before {
+      content: "PROPIEDAD DE JOSE MANUEL JARA - RPOS";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-size: 32px;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.025);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+    
+    /* Logo Ripley */
+    .logo-container { text-align: center; margin-bottom: 20px; }
+    .ripley-logo-box { display: inline-flex; align-items: center; background-color: #000; padding: 12px 20px; border-radius: 4px; position: relative; overflow: hidden; box-sizing: border-box; max-width: 100%; }
+    .ripley-text { color: #ffffff; font-family: 'Times New Roman', Times, serif; font-size: 32px; letter-spacing: 14px; margin-right: -14px; font-weight: normal; user-select: none; }
+    .ripley-dotcom { writing-mode: vertical-rl; transform: rotate(180deg); color: #000; font-weight: bold; font-size: 16px; margin-left: 12px; font-family: Arial, sans-serif; user-select: none; }
+    .ripley-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 6px; background: linear-gradient(to right, #d9252e 0%, #d9252e 12%, #792a7e 12%, #792a7e 24%, #f6cd00 24%, #f6cd00 36%, #cccccc 36%, #cccccc 48%, #d9252e 48%, #d9252e 60%, #792a7e 60%, #792a7e 72%, #f6cd00 72%, #f6cd00 84%, #d9252e 84%, #d9252e 100%); }
+
+    h2 { text-align: center; color: #1a252f; margin-bottom: 20px; margin-top: 10px; }
     
     /* Pestañas (Tabs) superiores */
     .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #bdc3c7; }
@@ -32,13 +55,23 @@
     .btn-guardar:hover { background-color: #219653; }
     .btn-guardar:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 
-    .watermark { text-align: center; font-size: 11px; color: #95a5a6; margin-top: 25px; text-transform: uppercase; font-weight: 600; }
+    .watermark { text-align: center; font-size: 11px; color: #95a5a6; margin-top: 25px; text-transform: uppercase; font-weight: 600; user-select: none; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2>Control RPOS Ripley</h2>
+    
+    <!-- LOGOTIPO RIPLEY EMBEBIDO -->
+    <div class="logo-container">
+      <div style="display: inline-flex; align-items: center;">
+        <div class="ripley-logo-box">
+          <span class="ripley-text">RIPLEY</span>
+          <div class="ripley-bar"></div>
+        </div>
+        <span class="ripley-dotcom">.com</span>
+      </div>
+    </div>
 
     <!-- Pestañas de Navegación -->
     <div class="tabs">
@@ -56,7 +89,7 @@
       <input type="text" inputmode="numeric" id="inputEquipo" placeholder="Pistolear equipo..." autocomplete="off">
     </div>
 
-    <!-- Campo RUT con formato automático -->
+    <!-- Campo RUT (Solo visible/activo en Retiro) -->
     <div class="input-group" id="groupRut">
       <label for="inputRut">RUT de la Persona:</label>
       <input type="text" inputmode="numeric" id="inputRut" placeholder="Ej: 123456789 o -11 para K" disabled autocomplete="off">
@@ -179,6 +212,10 @@
         if (inputRut.value.trim() !== "") {
           btnGuardar.disabled = false;
         }
+      } else {
+        // Validación personalizada para retiro si falta equipo
+        statusBox.innerText = "Falta equipo";
+        statusBox.className = "status danger";
       }
     }
 
@@ -196,19 +233,31 @@
     inputEquipo.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
+        const valEquipo = limpiarTexto(inputEquipo.value);
+        if (valEquipo === "") {
+          // Si está en entrega o retiro y se intenta enviar vacío
+          statusBox.innerText = "Falta equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+
         if (modoActual === "retiro") {
           procesarEquipoRetiro();
         } else {
-          if (limpiarTexto(inputEquipo.value) !== "") {
-            confirmarYGuardar();
-          }
+          confirmarYGuardar();
         }
       }
     });
 
     inputEquipo.addEventListener("blur", function() {
       if (modoActual === "retiro" && !inputEquipo.disabled) {
-        procesarEquipoRetiro();
+        const val = limpiarTexto(inputEquipo.value);
+        if (val === "") {
+          statusBox.innerText = "Falta equipo";
+          statusBox.className = "status danger";
+        } else {
+          procesarEquipoRetiro();
+        }
       }
     });
 
@@ -225,8 +274,31 @@
       const equipo = limpiarTexto(inputEquipo.value);
       let rut = limpiarTexto(inputRut.value);
 
-      if (modoActual === "retiro" && (equipo === "" || rut === "")) return;
-      if (modoActual === "entrega" && equipo === "") return;
+      // Validaciones independientes según el modo sin mencionar RUT en entrega
+      if (modoActual === "retiro") {
+        if (equipo === "" && rut === "") {
+          statusBox.innerText = "Falta RUT o equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+        if (equipo === "") {
+          statusBox.innerText = "Falta equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+        if (rut === "") {
+          statusBox.innerText = "Falta RUT";
+          statusBox.className = "status danger";
+          return;
+        }
+      } else {
+        // En entrega solo evalúa el equipo
+        if (equipo === "") {
+          statusBox.innerText = "Falta equipo";
+          statusBox.className = "status danger";
+          return;
+        }
+      }
 
       if (rut.endsWith("-11")) {
         rut = rut.slice(0, -3) + "-K";
