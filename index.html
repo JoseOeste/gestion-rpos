@@ -1,3 +1,11 @@
+<!--
+===================================================================
+  SISTEMA DE GESTIÓN Y AUDITORÍA DE EQUIPOS RPOS
+  Desarrollado por: Jose Manuel Jara Barbe
+  Año: 2026
+  Todos los derechos reservados.
+===================================================================
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,7 +13,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Control RPOS Ripley</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background-color: #f4f6f9; 
+      margin: 0; 
+      padding: 20px; 
+    }
     
     body::before {
       content: "PROPIEDAD DE JOSE MANUEL JARA - RPOS";
@@ -21,7 +34,15 @@
       z-index: 9999;
     }
 
-    .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+    .container { 
+      max-width: 500px; 
+      margin: 0 auto; 
+      background: white; 
+      padding: 25px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+      position: relative; 
+    }
     
     /* Logo Ripley */
     .logo-container { text-align: center; margin-bottom: 20px; }
@@ -34,7 +55,7 @@
     
     /* Pestañas (Tabs) superiores */
     .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #bdc3c7; }
-    .tab-btn { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; background: #ecf0f1; border: none; cursor: pointer; color: #7f8c8d; transition: all 0.2s; }
+    .tab-btn { flex: 1; padding: 12px; font-size: 16px; font-weight: bold; background: #ecf0f1; border: none; cursor: pointer; color: #7f8c8d; transition: all 0.2s; user-select: none; }
     .tab-btn.active { background: white; color: #2c3e50; border-bottom: 3px solid #3498db; }
     .tab-btn:first-child.active { border-bottom-color: #2980b9; }
     .tab-btn:last-child.active { border-bottom-color: #27ae60; }
@@ -42,11 +63,11 @@
     .input-group { margin-bottom: 20px; }
     label { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
     
-    input { width: 100%; padding: 12px; font-size: 16px !important; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; }
+    input { width: 100%; padding: 12px; font-size: 16px !important; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; -webkit-appearance: none; }
     input:focus { border-color: #3498db; background-color: #eaf2f8; }
     input:disabled { background-color: #f2f4f4; cursor: not-allowed; }
     
-    .status { padding: 14px; font-weight: bold; text-align: center; border-radius: 6px; margin-bottom: 20px; background-color: #ebf5fb; color: #2980b9; border: 1px solid #aed6f1; cursor: pointer; }
+    .status { padding: 14px; font-weight: bold; text-align: center; border-radius: 6px; margin-bottom: 20px; background-color: #ebf5fb; color: #2980b9; border: 1px solid #aed6f1; cursor: pointer; user-select: none; }
     .status-step2 { background-color: #fef9e7; color: #7d6608; border-color: #f9e79f; }
     .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
     .danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
@@ -72,6 +93,8 @@
         <span class="ripley-dotcom">.com</span>
       </div>
     </div>
+
+    <h2>Control RPOS Ripley</h2>
 
     <!-- Pestañas de Navegación -->
     <div class="tabs">
@@ -213,7 +236,6 @@
           btnGuardar.disabled = false;
         }
       } else {
-        // Validación personalizada para retiro si falta equipo
         statusBox.innerText = "Falta equipo";
         statusBox.className = "status danger";
       }
@@ -235,7 +257,6 @@
         e.preventDefault();
         const valEquipo = limpiarTexto(inputEquipo.value);
         if (valEquipo === "") {
-          // Si está en entrega o retiro y se intenta enviar vacío
           statusBox.innerText = "Falta equipo";
           statusBox.className = "status danger";
           return;
@@ -252,10 +273,7 @@
     inputEquipo.addEventListener("blur", function() {
       if (modoActual === "retiro" && !inputEquipo.disabled) {
         const val = limpiarTexto(inputEquipo.value);
-        if (val === "") {
-          statusBox.innerText = "Falta equipo";
-          statusBox.className = "status danger";
-        } else {
+        if (val !== "") {
           procesarEquipoRetiro();
         }
       }
@@ -274,25 +292,13 @@
       const equipo = limpiarTexto(inputEquipo.value);
       let rut = limpiarTexto(inputRut.value);
 
-      // Validaciones independientes según el modo sin mencionar RUT en entrega
       if (modoActual === "retiro") {
-        if (equipo === "" && rut === "") {
+        if (equipo === "" || rut === "") {
           statusBox.innerText = "Falta RUT o equipo";
           statusBox.className = "status danger";
           return;
         }
-        if (equipo === "") {
-          statusBox.innerText = "Falta equipo";
-          statusBox.className = "status danger";
-          return;
-        }
-        if (rut === "") {
-          statusBox.innerText = "Falta RUT";
-          statusBox.className = "status danger";
-          return;
-        }
       } else {
-        // En entrega solo evalúa el equipo
         if (equipo === "") {
           statusBox.innerText = "Falta equipo";
           statusBox.className = "status danger";
@@ -360,6 +366,16 @@
         timerReset = setTimeout(resetFormulario, 3000);
       });
     }
+
+    // Parche anti-zoom para celulares
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', function() {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.body.scrollTop = 0;
+        }, 50);
+      }, { passive: true });
+    });
 
     window.onload = () => resetFormulario();
   </script>
