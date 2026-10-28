@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Control RPOS Ripley</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
@@ -19,7 +19,7 @@
     .input-group { margin-bottom: 20px; }
     label { display: block; font-weight: bold; margin-bottom: 8px; color: #34495e; }
     
-    input { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; }
+    input { width: 100%; padding: 12px; font-size: 16px !important; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; outline: none; }
     input:focus { border-color: #3498db; background-color: #eaf2f8; }
     input:disabled { background-color: #f2f4f4; cursor: not-allowed; }
     
@@ -56,10 +56,10 @@
       <input type="text" inputmode="numeric" id="inputEquipo" placeholder="Pistolear equipo..." autocomplete="off">
     </div>
 
-    <!-- Campo RUT (Solo visible/activo en Retiro) -->
+    <!-- Campo RUT con formato automático -->
     <div class="input-group" id="groupRut">
       <label for="inputRut">RUT de la Persona:</label>
-      <input type="text" inputmode="numeric" id="inputRut" placeholder="Esperando equipo..." disabled autocomplete="off">
+      <input type="text" inputmode="numeric" id="inputRut" placeholder="Ej: 123456789 o -11 para K" disabled autocomplete="off">
     </div>
 
     <!-- Botón Guardar -->
@@ -71,10 +71,9 @@
   </div>
 
   <script>
-    // URL de tu Web App de Google Apps Script (Terminada en /exec)
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwyWgS-NOAplzryGaxJYU-FI_ROsHxR_ewvpVUv7X4DYAI6sLUVlNRPnePca3htWG2Xag/exec"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec"; 
     
-    let modoActual = "retiro"; // "retiro" o "entrega"
+    let modoActual = "retiro";
     let timerReset = null;
 
     const tabRetiro = document.getElementById("tabRetiro");
@@ -97,7 +96,7 @@
         groupRut.style.display = "block";
       } else {
         tabEntrega.classList.add("active");
-        groupRut.style.display = "none"; // En entrega no se pide RUT
+        groupRut.style.display = "none";
       }
 
       resetFormulario();
@@ -117,7 +116,7 @@
         btnGuardar.disabled = true;
       } else {
         statusBox.innerText = "Ingresa el N° EQUIPO a devolver";
-        btnGuardar.disabled = false; // En entrega se habilita directo al ingresar el equipo
+        btnGuardar.disabled = false;
       }
       statusBox.className = "status";
 
@@ -128,6 +127,48 @@
       return str ? str.trim().toUpperCase() : "";
     }
 
+    // Función para formatear RUT chileno automáticamente mientras se escribe
+    function formatearRutChileno(valor) {
+      let limpio = valor.toUpperCase().replace(/[^0-9K]/g, "");
+      if (limpio === "") return "";
+      
+      let cuerpo = "";
+      let dv = "";
+      
+      // Si termina en 11 (para la K) y tiene suficientes dígitos
+      if (limpio.endsWith("11") && limpio.length > 3) {
+        cuerpo = limpio.slice(0, -2);
+        dv = "11";
+      } else {
+        cuerpo = limpio.slice(0, -1);
+        dv = limpio.slice(-1);
+      }
+      
+      if (limpio.length === 1 || (limpio.length === 2 && dv === "11")) {
+        return limpio;
+      }
+      
+      // Agregar puntos de miles al cuerpo
+      let cuerpoFormateado = "";
+      while (cuerpo.length > 3) {
+        cuerpoFormateado = "." + cuerpo.slice(-3) + cuerpoFormateado;
+        cuerpo = cuerpo.slice(0, -3);
+      }
+      cuerpoFormateado = cuerpo + cuerpoFormateado;
+      
+      return cuerpoFormateado + "-" + dv;
+    }
+
+    // Evento input para aplicar el formato visual en vivo
+    inputRut.addEventListener("input", function() {
+      let valorActual = inputRut.value;
+      inputRut.value = formatearRutChileno(valorActual);
+
+      if (modoActual === "retiro") {
+        btnGuardar.disabled = (inputRut.value.trim() === "");
+      }
+    });
+
     function procesarEquipoRetiro() {
       if (inputEquipo.disabled) return;
       const val = limpiarTexto(inputEquipo.value);
@@ -136,7 +177,7 @@
         inputEquipo.disabled = true;
         inputRut.disabled = false;
         inputRut.focus();
-        statusBox.innerText = "Paso 2: Ingresa tu RUT";
+        statusBox.innerText = "Paso 2: Ingresa tu RUT (si termina en K usa -11)";
         statusBox.className = "status status-step2";
         if (inputRut.value.trim() !== "") {
           btnGuardar.disabled = false;
@@ -174,12 +215,6 @@
       }
     });
 
-    inputRut.addEventListener("input", function() {
-      if (modoActual === "retiro") {
-        btnGuardar.disabled = (inputRut.value.trim() === "");
-      }
-    });
-
     inputRut.addEventListener("keypress", function(e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -191,10 +226,15 @@
 
     function confirmarYGuardar() {
       const equipo = limpiarTexto(inputEquipo.value);
-      const rut = limpiarTexto(inputRut.value);
+      let rut = limpiarTexto(inputRut.value);
 
       if (modoActual === "retiro" && (equipo === "" || rut === "")) return;
       if (modoActual === "entrega" && equipo === "") return;
+
+      // Transformación automática: Si el RUT termina en -11, lo cambia a -K para la base de datos
+      if (rut.endsWith("-11")) {
+        rut = rut.slice(0, -3) + "-K";
+      }
 
       // Bloquear controles y mostrar estado de carga
       inputEquipo.disabled = true;
