@@ -47,7 +47,7 @@
     </div>
 
     <div id="statusBox" class="status" onclick="resetFormulario()" title="Haz clic para reiniciar">
-      Paso 1: Pistolea el código del EQUIPO
+      Paso 1: Ingresa N° del EQUIPO
     </div>
 
     <!-- Campo Equipo -->
@@ -113,10 +113,10 @@
       btnGuardar.innerText = "💾 Guardar Registro";
 
       if (modoActual === "retiro") {
-        statusBox.innerText = "Paso 1: Pistolea el código del EQUIPO";
+        statusBox.innerText = "Paso 1: Ingresa N° del EQUIPO";
         btnGuardar.disabled = true;
       } else {
-        statusBox.innerText = "Pistolea el código del EQUIPO a devolver";
+        statusBox.innerText = "Ingresa el N° EQUIPO a devolver";
         btnGuardar.disabled = false; // En entrega se habilita directo al ingresar el equipo
       }
       statusBox.className = "status";
@@ -136,7 +136,7 @@
         inputEquipo.disabled = true;
         inputRut.disabled = false;
         inputRut.focus();
-        statusBox.innerText = "Paso 2: Pistolea o escribe el RUT de la persona";
+        statusBox.innerText = "Paso 2: Ingresa tu RUT";
         statusBox.className = "status status-step2";
         if (inputRut.value.trim() !== "") {
           btnGuardar.disabled = false;
