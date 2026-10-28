@@ -71,7 +71,7 @@
   </div>
 
   <script>
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxz3yFFEZMbFjUoeM8zBpmkUr0RALg280FkUPz8CqQfOTZT6cY0h_vY6i8bUPqU870l/exec"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbymgKY0pIwUb26P0hmYa4UKBE3Phhr6uGbkf23X5qN_U82v_i0HGktXycP07sfbutf3_w/exec"; 
     
     let modoActual = "retiro";
     let timerReset = null;
@@ -135,7 +135,6 @@
       let cuerpo = "";
       let dv = "";
       
-      // Si termina en 11 (para la K) y tiene suficientes dígitos
       if (limpio.endsWith("11") && limpio.length > 3) {
         cuerpo = limpio.slice(0, -2);
         dv = "11";
@@ -148,7 +147,6 @@
         return limpio;
       }
       
-      // Agregar puntos de miles al cuerpo
       let cuerpoFormateado = "";
       while (cuerpo.length > 3) {
         cuerpoFormateado = "." + cuerpo.slice(-3) + cuerpoFormateado;
@@ -159,7 +157,6 @@
       return cuerpoFormateado + "-" + dv;
     }
 
-    // Evento input para aplicar el formato visual en vivo
     inputRut.addEventListener("input", function() {
       let valorActual = inputRut.value;
       inputRut.value = formatearRutChileno(valorActual);
@@ -231,7 +228,6 @@
       if (modoActual === "retiro" && (equipo === "" || rut === "")) return;
       if (modoActual === "entrega" && equipo === "") return;
 
-      // Transformación automática: Si el RUT termina en -11, lo cambia a -K para la base de datos
       if (rut.endsWith("-11")) {
         rut = rut.slice(0, -3) + "-K";
       }
@@ -245,11 +241,25 @@
       statusBox.innerText = "Procesando registro en el servidor...";
       statusBox.className = "status";
 
+      // Generar fecha estrictamente con barras (/) y zona horaria de Santiago
+      const ahora = new Date();
+      const opciones = { timeZone: "America/Santiago", hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      const partesFecha = new Intl.DateTimeFormat('es-CL', opciones).formatToParts(ahora);
+      
+      let d = partesFecha.find(p => p.type === 'day').value;
+      let m = partesFecha.find(p => p.type === 'month').value;
+      let y = partesFecha.find(p => p.type === 'year').value;
+      let h = partesFecha.find(p => p.type === 'hour').value;
+      let min = partesFecha.find(p => p.type === 'minute').value;
+      let s = partesFecha.find(p => p.type === 'second').value;
+      
+      const fechaConBarras = `${d}/${m}/${y} ${h}:${min}:${s}`;
+
       const payload = {
         accion: modoActual,
         equipo: equipo,
         rut: (modoActual === "retiro") ? rut : "",
-        fecha: new Date().toLocaleString("es-CL", { timeZone: "America/Santiago" })
+        fecha: fechaConBarras
       };
 
       fetch(URL_SCRIPT, {
