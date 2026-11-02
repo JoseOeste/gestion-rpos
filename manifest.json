@@ -1,0 +1,21 @@
+{
+  "short_name": "RPOS Ripley",
+  "name": "Control RPOS Ripley",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192.png?text=RPOS",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512.png?text=RPOS",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#f4f6f9",
+  "theme_color": "#1a252f",
+  "display": "standalone",
+  "orientation": "portrait"
+}
