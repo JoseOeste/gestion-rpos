@@ -1,21 +1,25 @@
 {
+  "id": "/gestion-rpos/",
   "short_name": "RPOS Ripley",
   "name": "Control RPOS Ripley",
+  "start_url": "/gestion-rpos/index.html",
+  "scope": "/gestion-rpos/",
+  "background_color": "#f4f6f9",
+  "theme_color": "#1a252f",
+  "display": "standalone",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://via.placeholder.com/192x192.png?text=RPOS",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "https://via.placeholder.com/512x512.png?text=RPOS",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": "./index.html",
-  "background_color": "#f4f6f9",
-  "theme_color": "#1a252f",
-  "display": "standalone",
-  "orientation": "portrait"
+  ]
 }
